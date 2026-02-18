@@ -1,1 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finfluencer Risk Detector · demo</title>
+    <!-- Font & Icons (Font Awesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
 
+        body {
+            background: #f6f9fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .app-container {
+            max-width: 1300px;
+            width: 100%;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 1.8rem;
+        }
+
+        /* left main panel */
+        .analyzer-panel {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 15px 35px -10px rgba(0, 30, 60, 0.15);
+            padding: 2rem 2rem 2.5rem;
+            transition: all 0.2s ease;
+        }
+
+        /* right side panel */
+        .examples-panel {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 15px 25px -8px rgba(0, 30, 60, 0.1);
+            padding: 1.8rem 1.5rem;
+            height: fit-content;
+        }
+
+        /* header */
+        .app-header {
+            margin-bottom: 2.5rem;
+        }
+        .app-header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #0b2545;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .app-header h1 i {
+            color: #1e4a6f;
+            background: #e4effa;
+            padding: 12px;
+            border-radius: 60%;
+            font-size: 1.5rem;
+        }
+        .app-header .subtitle {
+            font-size: 1rem;
+            color: #4f6f8f;
+            margin-top: 6px;
+            margin-left: 56px;
+            font-weight: 400;
+        }
+
+        /* link bar section */
+        .link-section {
+            margin-bottom: 1.8rem;
+            background: #f0f6fd;
+            border-radius: 20px;
+            padding: 1.2rem 1.5rem;
+            border: 1px solid #d0e2f2;
+        }
+        .link-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: #1a3b5c;
+            margin-bottom: 12px;
+        }
+        .link-label i {
+            color: #2670b0;
+        }
+        .link-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .link-input-box {
+            flex: 1;
+            min-width: 240px;
+            padding: 0.9rem 1.2rem;
+            font-size: 0.95rem;
+            border: 2px solid #d2e3f0;
+            border-radius: 50px;
+            background: white;
+            transition: border 0.2s;
+            color: #0f2b40;
+        }
+        .link-input-box:focus {
+            outline: none;
+            border-color: #2f86d6;
+        }
+        .fetch-link-btn {
+            background: #1d4e7c;
+            color: white;
+            border: none;
+            padding: 0.9rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(22, 78, 130, 0.3);
+        }
+        .fetch-link-btn:hover {
+            background: #0d3b61;
+            transform: translateY(-2px);
+        }
+        .fetch-link-btn i {
+            font-size: 1rem;
+        }
+
+        /* Link summary section */
+        .link-summary-section {
+            margin-top: 15px;
+            margin-bottom: 5px;
+            background: #e8f0fe;
+            border-radius: 16px;
+            padding: 1rem 1.3rem;
+            border-left: 5px solid #2f86d6;
+            display: none;
+        }
+        .link-summary-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #0d3b61;
+            margin-bottom: 8px;
+        }
+        .link-summary-header i {
+            color: #1d4e7c;
+        }
+        .link-summary-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #1f3a57;
+            background: white;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .link-summary-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #4f6f8f;
+            flex-wrap: wrap;
+        }
+        .link-summary-meta i {
+            margin-right: 4px;
+            color: #2f86d6;
+        }
+
+        /* input section */
+        .input-section {
+            margin-bottom: 2rem;
+        }
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: #1a3b5c;
+            margin-bottom: 10px;
+        }
+        .input-label i {
+            color: #2670b0;
+        }
+        .text-input-box {
+            width: 100%;
+            padding: 1.2rem 1.5rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border: 2px solid #e2ecf5;
+            border-radius: 24px;
+            background: #fbfdff;
+            box-shadow: inset 0 2px 5px rgba(0,20,40,0.02);
+            transition: border 0.2s;
+            resize: vertical;
+            min-height: 140px;
+            color: #0f2b40;
+        }
+        .text-input-box:focus {
+            outline: none;
+            border-color: #2f86d6;
+            background: white;
+        }
+
+        /* analyze button */
+        .analyze-btn {
+            background: #0d2742;
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 20px -5px rgba(15, 70, 120, 0.4);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .analyze-btn:hover {
+            background: #154a75;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px -6px #0d274266;
+        }
+        .analyze-btn i {
+            font-size: 1.2rem;
+        }
+
+        /* results panel */
+        .results-card {
+            background: #f4f9ff;
+            border-radius: 24px;
+            padding: 1.8rem 2rem;
+            margin-top: 2.5rem;
+            border: 1px solid rgba(46, 125, 188, 0.15);
+            box-shadow: 0 6px 14px rgba(0,30,50,0.05);
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: #103656;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+        .result-title i {
+            color: #2879c9;
+        }
+
+        /* Two-column layout for meter and graph */
+        .visualization-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* risk meter */
+        .meter-container {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .meter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 12px;
+        }
+        .meter-header span:first-child {
+            font-weight: 600;
+            color: #1f4870;
+        }
+        .risk-value {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: #f0f6fd;
+            padding: 5px 16px;
+            border-radius: 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .meter-bar-bg {
+            height: 30px;
+            background: #e3eaf1;
+            border-radius: 40px;
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+            box-shadow: inset 0 1px 4px #b0c4d9;
+            margin: 15px 0 10px;
+        }
+        .meter-fill {
+            width: 65%;
+            height: 100%;
+            background: #f55d3e;
+            border-radius: 40px;
+            transition: width 0.3s ease, background 0.2s;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            color: #456f9c;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+        .meter-labels span i {
+            margin-right: 4px;
+        }
+        .green-dot { color: #28a745; }
+        .yellow-dot { color: #f4b740; }
+        .red-dot { color: #dc3545; }
+
+        /* graph container */
+        .graph-container {
+            background: white;
+            border-radius: 20px;
+            padding: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .graph-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #1f4870;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+        .graph-header i {
+            color: #2879c9;
+        }
+        .chart-container {
+            position: relative;
+            height: 150px;
+            width: 100%;
+        }
+
+        /* keywords box */
+        .keywords-box {
+            background: white;
+            border-radius: 20px;
+            padding: 1.2rem 1.5rem;
+            margin: 1.8rem 0 1.5rem;
+            border-left: 6px solid #dc3545;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .keywords-header {
+            display: flex;
+            gap: 8px;
+            font-weight: 600;
+            color: #b1323f;
+            margin-bottom: 12px;
+        }
+        .keyword-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .chip {
+            background: #fce9e7;
+            color: #b13e32;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 1px solid #f5c0b8;
+        }
+        .chip i {
+            margin-right: 6px;
+            font-size: 0.8rem;
+            color: #c7422e;
+        }
+
+        /* warning message */
+        .warning-message {
+            background: #fff7e5;
+            border-radius: 18px;
+            padding: 1.4rem 1.6rem;
+            border-left: 6px solid #f4b740;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            color: #5a4a2e;
+        }
+        .warning-message i {
+            font-size: 1.8rem;
+            color: #d68b2c;
+        }
+        .warning-text {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* examples panel */
+        .examples-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #103656;
+            margin-bottom: 1.8rem;
+        }
+        .examples-header i {
+            background: #e1effa;
+            padding: 12px;
+            border-radius: 20px;
+            color: #1c5783;
+        }
+        .example-card {
+            background: #f9fcff;
+            border-radius: 22px;
+            padding: 1.2rem 1.2rem 1.2rem 1.5rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid #dbeaf5;
+            transition: all 0.1s;
+            cursor: pointer;
+            box-shadow: 0 4px 8px -4px rgba(0, 32, 64, 0.06);
+        }
+        .example-card:hover {
+            background: white;
+            border-color: #b1cfed;
+        }
+        .example-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .example-title i {
+            font-size: 1rem;
+        }
+        .example-snippet {
+            color: #2a4f70;
+            font-size: 0.9rem;
+            margin-left: 26px;
+            margin-bottom: 4px;
+            font-style: italic;
+            border-left: 3px solid #cbdbe9;
+            padding-left: 12px;
+        }
+        .example-tag {
+            display: inline-block;
+            margin-left: 26px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            padding: 3px 10px;
+            border-radius: 40px;
+            background: #e7f0f9;
+            color: #285e84;
+        }
+        .safe-tag { background: #dff0df; color: #1f724c; }
+        .susp-tag { background: #fff1d6; color: #a8681c; }
+        .high-tag { background: #ffe2de; color: #b53b2a; }
+
+        /* responsive */
+        @media (max-width: 850px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .visualization-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="app-header">
+        <h1>
+            <i class="fas fa-robot"></i> 
+            AI Finfluencer Risk Detector
+        </h1>
+        <div class="subtitle">
+            <i class="fas fa-chart-line" style="margin-right: 6px;"></i>Analyze financial advice risk instantly · demo
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <!-- LEFT PANEL -->
+        <div class="analyzer-panel">
+            <!-- LINK BAR SECTION -->
+            <div class="link-section">
+                <div class="link-label">
+                    <i class="fas fa-link"></i>
+                    <span>Add link for analysis</span>
+                </div>
+                <div class="link-input-group">
+                    <input type="url" id="linkInput" class="link-input-box" placeholder="https://example.com/financial-advice" value="https://twitter.com/finfluencer/status/123456789">
+                    <button class="fetch-link-btn" id="fetchLinkBtn">
+                        <i class="fas fa-cloud-download-alt"></i> Fetch
+                    </button>
+                </div>
+                
+                <!-- Link Summary Section -->
+                <div class="link-summary-section" id="linkSummarySection">
+                    <div class="link-summary-header">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Link Summary</span>
+                    </div>
+                    <div class="link-summary-content" id="linkSummaryContent">
+                        <!-- Summary will be inserted here dynamically -->
+                    </div>
+                    <div class="link-summary-meta" id="linkSummaryMeta">
+                        <!-- Meta info will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <div class="input-label">
+                    <i class="fas fa-paste"></i> 
+                    <span>Paste financial advice or transcript</span>
+                </div>
+                <textarea id="adviceInput" class="text-input-box" placeholder="e.g., 'Bitcoin will 100x next week, put your life savings now!' or any finfluencer claim...">🚀💰 This token is going to explode 1000%! Don't miss out, leverage now!! #FOMO</textarea>
+            </div>
+
+            <button class="analyze-btn" id="analyzeBtn">
+                <i class="fas fa-shield-alt"></i> Analyze Risk
+            </button>
+
+            <!-- RESULTS panel -->
+            <div class="results-card" id="resultsPanel">
+                <div class="result-title">
+                    <i class="fas fa-file-signature"></i> Risk analysis report
+                </div>
+
+                <!-- Two-column layout for meter and graph -->
+                <div class="visualization-row">
+                    <!-- Risk Score Meter -->
+                    <div class="meter-container">
+                        <div class="meter-header">
+                            <span><i class="fas fa-ruler-combined"></i> Risk score (0–10)</span>
+                            <span class="risk-value" id="riskScoreDisplay">6.5</span>
+                        </div>
+                        <div class="meter-bar-bg">
+                            <div class="meter-fill" id="riskFill" style="width: 65%; background: #f55d3e;"></div>
+                        </div>
+                        <div class="meter-labels">
+                            <span><i class="fas fa-circle green-dot"></i> 0–3 low</span>
+                            <span><i class="fas fa-circle yellow-dot"></i> 4–6 suspicious</span>
+                            <span><i class="fas fa-circle red-dot"></i> 7–10 high</span>
+                        </div>
+                    </div>
+
+                    <!-- Graph visualization -->
+                    <div class="graph-container">
+                        <div class="graph-header">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Risk components breakdown</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="riskChart"></canvas>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.7rem; color: #4f6f8f;">
+                            <span><i class="fas fa-circle" style="color: #ff6384;"></i> Hype</span>
+                            <span><i class="fas fa-circle" style="color: #ffcd56;"></i> Urgency</span>
+                            <span><i class="fas fa-circle" style="color: #36a2eb;"></i> Unrealistic</span>
+                            <span><i class="fas fa-circle" style="color: #4bc0c0;"></i> Pressure</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Highlighted risky keywords -->
+                <div class="keywords-box" id="keywordsBox">
+                    <div class="keywords-header">
+                        <i class="fas fa-exclamation-triangle"></i> <span>Risky keywords detected</span>
+                    </div>
+                    <div class="keyword-chips" id="keywordChips">
+                        <span class="chip"><i class="fas fa-bolt"></i> 1000%</span>
+                        <span class="chip"><i class="fas fa-bolt"></i> explode</span>
+                        <span class="chip"><i class="fas fa-bolt"></i> leverage</span>
+                        <span class="chip"><i class="fas fa-bolt"></i> FOMO</span>
+                        <span class="chip"><i class="fas fa-bolt"></i> life savings</span>
+                    </div>
+                </div>
+
+                <!-- Warning explanation -->
+                <div class="warning-message" id="warningMsg">
+                    <i class="fas fa-circle-exclamation"></i>
+                    <div class="warning-text" id="warningTextContent">
+                        <strong>High risk of misleading hype:</strong> Unrealistic return promises ('1000%'), urgency ('FOMO') and encouragement to overcommit ('life savings') are classic pump signals.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: examples -->
+        <div class="examples-panel">
+            <div class="examples-header">
+                <i class="fas fa-lightbulb"></i> 
+                <span>sample inputs</span>
+            </div>
+            <!-- safe example -->
+            <div class="example-card" data-example="safe">
+                <div class="example-title">
+                    <i class="fas fa-check-circle" style="color:#28a745;"></i> Safe advice
+                </div>
+                <div class="example-snippet">“Consider diversifying into low-cost index funds over the long term. Past performance doesn’t guarantee future results.”</div>
+                <span class="example-tag safe-tag"><i class="fas-regular fa-leaf"></i> low risk</span>
+            </div>
+            <!-- suspicious example -->
+            <div class="example-card" data-example="suspicious">
+                <div class="example-title">
+                    <i class="fas fa-circle-exclamation" style="color:#f4b740;"></i> Suspicious
+                </div>
+                <div class="example-snippet">“Analysts whisper this small-cap gem could 5x soon, but you need to act fast before the crowd.”</div>
+                <span class="example-tag susp-tag"><i class="fas fa-clock"></i> suspicious</span>
+            </div>
+            <!-- high-risk hype sample -->
+            <div class="example-card" data-example="highrisk">
+                <div class="example-title">
+                    <i class="fas fa-skull-crosswind" style="color:#dc3545;"></i> High-risk hype
+                </div>
+                <div class="example-snippet">“This guaranteed 100x moonshot is exploding! Put your entire portfolio now, don't think, just buy!!”</div>
+                <span class="example-tag high-tag"><i class="fas fa-bolt"></i> high risk</span>
+            </div>
+            <!-- tip -->
+            <div style="margin-top: 1.2rem; font-size:0.8rem; color:#48749e; background:#ebf3fa; padding:0.8rem; border-radius: 18px;">
+                <i class="fas fa-mouse-pointer"></i> Click any example to fill the analyzer.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- footer -->
+<div style="text-align: center; margin-top: 1.5rem; color: #5c7f9c; font-size:0.8rem;">
+    <i class="fas fa-shield"></i> prototype · AI risk detection · fintech demo
+</div>
+
+<script>
+    (function() {
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const fetchLinkBtn = document.getElementById('fetchLinkBtn');
+        const inputField = document.getElementById('adviceInput');
+        const linkInput = document.getElementById('linkInput');
+        const riskFill = document.getElementById('riskFill');
+        const riskScoreDisplay = document.getElementById('riskScoreDisplay');
+        const keywordChips = document.getElementById('keywordChips');
+        const warningText = document.getElementById('warningTextContent');
+        
+        // Link summary elements
+        const linkSummarySection = document.getElementById('linkSummarySection');
+        const linkSummaryContent = document.getElementById('linkSummaryContent');
+        const linkSummaryMeta = document.getElementById('linkSummaryMeta');
+
+        // Chart initialization
+        const ctx = document.getElementById('riskChart').getContext('2d');
+        let riskChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Hype', 'Urgency', 'Unrealistic', 'Pressure'],
+                datasets: [{
+                    label: 'Risk Score',
+                    data: [8, 7, 9, 6],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(255, 205, 86, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(75, 192, 192, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(255, 205, 86)',
+                        'rgb(54, 162, 235)',
+                        'rgb(75, 192, 192)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Risk level: ${context.raw}/10`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        },
+                        ticks: {
+                            stepSize: 2,
+                            callback: function(value) {
+                                return value + '';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Detailed link data with summaries
+        const linkDataMap = {
+            'twitter.com': {
+                content: 'Just found this amazing crypto project! They guarantee 1000% returns in one month! #tothemoon 🚀🚀🚀 Don\'t miss out on this life-changing opportunity!',
+                summary: 'This Twitter thread promotes a crypto project with unrealistic 1000% return guarantees. Uses excessive emojis, hashtags, and FOMO tactics. Multiple likes and retweets indicate viral spread of potentially misleading information.',
+                platform: 'Twitter/X',
+                author: '@crypto_guru',
+                date: '2 hours ago',
+                engagement: '2.5K likes, 1.2K retweets',
+                riskLevel: 'High'
+            },
+            'youtube.com': {
+                content: 'In this video I\'ll show you how to get rich quick with this secret trading strategy. 100x leverage is the key! FOMO is real guys!',
+                summary: 'YouTube video titled "Get Rich Quick with This Secret Strategy" promotes high-leverage trading without explaining risks. Creator has history of pump-and-dump schemes. Video lacks proper risk disclosures required for financial advice.',
+                platform: 'YouTube',
+                author: 'FinFluencer Daily',
+                date: '3 days ago',
+                engagement: '45K views, 2.3K comments',
+                riskLevel: 'High'
+            },
+            'reddit.com': {
+                content: 'DD: This small-cap gem is about to explode. Insiders are whispering 5x minimum. Act fast before the crowd catches on!',
+                summary: 'Reddit post in r/wallstreetbets claims "insider knowledge" about a small-cap stock. Uses anonymous sources and creates urgency. No verifiable evidence provided. Similar posts have preceded pump-and-dump schemes.',
+                platform: 'Reddit',
+                author: 'u/deep_fomo_value',
+                date: '6 hours ago',
+                engagement: '850 upvotes, 120 comments',
+                riskLevel: 'Suspicious'
+            },
+            'linkedin.com': {
+                content: 'Professional analysis: This sector shows strong fundamentals. Consider dollar-cost averaging over time with proper position sizing.',
+                summary: 'LinkedIn post from a CFA charterholder provides balanced investment advice. Includes proper risk warnings and suggests diversified approach. References verified market data and historical performance.',
+                platform: 'LinkedIn',
+                author: 'Sarah Chen, CFA',
+                date: '1 day ago',
+                engagement: '1.2K reactions, 45 comments',
+                riskLevel: 'Low'
+            },
+            'default': {
+                content: 'The financial advisor claims: "This is a guaranteed moonshot! Put your life savings in now and thank me later when it 100x!"',
+                summary: 'Generic financial advice with classic pump signals: guaranteed returns, life savings recommendation, and unrealistic multiples (100x). Lacks any risk disclosure or balanced perspective.',
+                platform: 'Unknown source',
+                author: 'Unknown',
+                date: 'Recent',
+                engagement: 'Limited data',
+                riskLevel: 'High'
+            }
+        };
+
+        // Function to extract domain from URL
+        function extractDomain(url) {
+            try {
+                const urlObj = new URL(url);
+                return urlObj.hostname.replace('www.', '');
+            } catch {
+                return 'unknown.com';
+            }
+        }
+
+        // Get link data based on URL
+        function getLinkData(url) {
+            const domain = extractDomain(url);
+            
+            if (domain.includes('twitter') || domain.includes('x.com')) {
+                return linkDataMap['twitter.com'];
+            } else if (domain.includes('youtube') || domain.includes('youtu.be')) {
+                return linkDataMap['youtube.com'];
+            } else if (domain.includes('reddit')) {
+                return linkDataMap['reddit.com'];
+            } else if (domain.includes('linkedin')) {
+                return linkDataMap['linkedin.com'];
+            } else {
+                return linkDataMap['default'];
+            }
+        }
+
+        // Update summary section with link data
+        function updateLinkSummary(url) {
+            const linkData = getLinkData(url);
+            const domain = extractDomain(url);
+            
+            // Create summary HTML
+            const summaryHTML = `
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <i class="fas fa-quote-right" style="color: #2f86d6; font-size: 1.2rem;"></i>
+                    <div>
+                        <p style="margin-bottom: 8px;"><strong>Content summary:</strong> ${linkData.summary}</p>
+                        <p style="background: #e8f0fe; padding: 6px 10px; border-radius: 8px; font-size: 0.9rem;">
+                            <i class="fas fa-exclamation-triangle" style="color: ${linkData.riskLevel === 'High' ? '#dc3545' : (linkData.riskLevel === 'Suspicious' ? '#f4b740' : '#28a745')};"></i> 
+                            Risk assessment: <strong style="color: ${linkData.riskLevel === 'High' ? '#dc3545' : (linkData.riskLevel === 'Suspicious' ? '#f4b740' : '#28a745')};">${linkData.riskLevel}</strong>
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            // Create meta HTML
+            const metaHTML = `
+                <span><i class="fas fa-globe"></i> ${linkData.platform}</span>
+                <span><i class="fas fa-user"></i> ${linkData.author}</span>
+                <span><i class="fas fa-calendar"></i> ${linkData.date}</span>
+                <span><i class="fas fa-chart-line"></i> ${linkData.engagement}</span>
+            `;
+            
+            linkSummaryContent.innerHTML = summaryHTML;
+            linkSummaryMeta.innerHTML = metaHTML;
+            
+            // Show the summary section
+            linkSummarySection.style.display = 'block';
+            
+            return linkData.content;
+        }
+
+        // Fetch link button handler
+        fetchLinkBtn.addEventListener('click', () => {
+            const url = linkInput.value.trim();
+            if (!url) {
+                alert('Please enter a link/URL');
+                return;
+            }
+            
+            // Show loading state
+            fetchLinkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+            fetchLinkBtn.disabled = true;
+            
+            // Simulate network delay
+            setTimeout(() => {
+                // Update summary and get content
+                const fetchedContent = updateLinkSummary(url);
+                inputField.value = fetchedContent;
+                
+                // Reset button
+                fetchLinkBtn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Fetch';
+                fetchLinkBtn.disabled = false;
+                
+                // Highlight that content was fetched
+                inputField.style.borderColor = '#28a745';
+                setTimeout(() => {
+                    inputField.style.borderColor = '#e2ecf5';
+                }, 1000);
+                
+                // Auto-analyze after fetch
+                setTimeout(() => {
+                    analyzeBtn.click();
+                }, 100);
+            }, 1500);
+        });
+
+        // Example cards click handler
+        const safeCard = document.querySelector('[data-example="safe"]');
+        const suspCard = document.querySelector('[data-example="suspicious"]');
+        const highCard = document.querySelector('[data-example="highrisk"]');
+
+        function setExample(text) {
+            inputField.value = text;
+            inputField.focus();
+            // Hide link summary when using examples
+            linkSummarySection.style.display = 'none';
+        }
+
+        safeCard.addEventListener('click', () => {
+            setExample("Consider diversifying into low-cost index funds over the long term. Past performance doesn’t guarantee future results.");
+        });
+        
+        suspCard.addEventListener('click', () => {
+            setExample("Analysts whisper this small-cap gem could 5x soon, but you need to act fast before the crowd.");
+        });
+        
+        highCard.addEventListener('click', () => {
+            setExample("This guaranteed 100x moonshot is exploding! Put your entire portfolio now, don't think, just buy!!");
+        });
+
+        // Function to generate chart data based on risk score and keywords
+        function updateChart(score, keywords) {
+            // Base values from score
+            let hypeScore = Math.min(10, score * 0.9 + 1);
+            let urgencyScore = Math.min(10, score * 0.8 + 1.5);
+            let unrealisticScore = Math.min(10, score * 1.1);
+            let pressureScore = Math.min(10, score * 0.7 + 2);
+            
+            // Adjust based on keywords
+            if (keywords.includes('100x') || keywords.includes('1000%') || keywords.includes('moonshot')) {
+                unrealisticScore = Math.min(10, unrealisticScore + 2.5);
+                hypeScore = Math.min(10, hypeScore + 2);
+            }
+            if (keywords.includes('FOMO') || keywords.includes('act fast')) {
+                urgencyScore = Math.min(10, urgencyScore + 2.5);
+                pressureScore = Math.min(10, pressureScore + 2);
+            }
+            if (keywords.includes('life savings') || keywords.includes('portfolio')) {
+                pressureScore = Math.min(10, pressureScore + 3);
+            }
+            if (keywords.includes('guaranteed') || keywords.includes('secret')) {
+                unrealisticScore = Math.min(10, unrealisticScore + 2);
+            }
+            
+            // Round to 1 decimal
+            hypeScore = Math.round(hypeScore * 10) / 10;
+            urgencyScore = Math.round(urgencyScore * 10) / 10;
+            unrealisticScore = Math.round(unrealisticScore * 10) / 10;
+            pressureScore = Math.round(pressureScore * 10) / 10;
+            
+            // Update chart data
+            riskChart.data.datasets[0].data = [hypeScore, urgencyScore, unrealisticScore, pressureScore];
+            
+            // Update bar colors based on values
+            const colors = [
+                hypeScore > 7 ? 'rgba(220, 53, 69, 0.8)' : (hypeScore > 4 ? 'rgba(255, 193, 7, 0.8)' : 'rgba(40, 167, 69, 0.8)'),
+                urgencyScore > 7 ? 'rgba(220, 53, 69, 0.8)' : (urgencyScore > 4 ? 'rgba(255, 193, 7, 0.8)' : 'rgba(40, 167, 69, 0.8)'),
+                unrealisticScore > 7 ? 'rgba(220, 53, 69, 0.8)' : (unrealisticScore > 4 ? 'rgba(255, 193, 7, 0.8)' : 'rgba(40, 167, 69, 0.8)'),
+                pressureScore > 7 ? 'rgba(220, 53, 69, 0.8)' : (pressureScore > 4 ? 'rgba(255, 193, 7, 0.8)' : 'rgba(40, 167, 69, 0.8)')
+            ];
+            
+            riskChart.data.datasets[0].backgroundColor = colors;
+            riskChart.update();
+        }
+
+        // Risk analysis engine
+        function analyzeRisk(text) {
+            const lower = text.toLowerCase();
+            let score = 3.0;
+            let keywords = [];
+
+            const riskyDict = [
+                { word: '100x', points: 2.2, label: '100x' },
+                { word: '1000%', points: 2.5, label: '1000%' },
+                { word: 'moonshot', points: 1.8, label: 'moonshot' },
+                { word: 'explod', points: 2.0, label: 'explode' },
+                { word: 'fomo', points: 1.7, label: 'FOMO' },
+                { word: 'life savings', points: 2.8, label: 'life savings' },
+                { word: 'guaranteed', points: 1.9, label: 'guaranteed' },
+                { word: 'portfolio', points: 0.8, label: 'portfolio' },
+                { word: '5x', points: 1.6, label: '5x' },
+                { word: 'act fast', points: 1.4, label: 'act fast' },
+                { word: 'don\'t think', points: 2.0, label: 'don\'t think' },
+                { word: 'leverage', points: 1.7, label: 'leverage' },
+                { word: 'gem', points: 1.0, label: 'gem' },
+                { word: 'whisper', points: 1.3, label: 'whisper' },
+                { word: 'rich quick', points: 2.3, label: 'rich quick' },
+                { word: 'secret', points: 1.5, label: 'secret' },
+                { word: 'insiders', points: 1.6, label: 'insiders' },
+            ];
+
+            let found = [];
+            riskyDict.forEach(item => {
+                if (lower.includes(item.word.toLowerCase())) {
+                    score += item.points;
+                    found.push(item.label);
+                }
+            });
+
+            // Risk reduction for safe terms
+            if (lower.includes('diversif') || lower.includes('long term') || lower.includes('past performance')) {
+                score -= 2.2;
+            }
+
+            score = Math.min(10, Math.max(0, score));
+            score = Math.round(score * 10) / 10;
+
+            const uniqueKeywords = [...new Set(found)].slice(0, 8);
+
+            return { score, keywords: uniqueKeywords };
+        }
+
+        function updateResults(score, keywords) {
+            const percent = (score / 10) * 100;
+            riskFill.style.width = percent + '%';
+
+            let color = '#f4b740';
+            if (score <= 3.5) color = '#28a745';
+            else if (score <= 6.5) color = '#f4b740';
+            else color = '#dc3545';
+            riskFill.style.background = color;
+
+            riskScoreDisplay.innerText = score.toFixed(1);
+
+            let chipsHtml = '';
+            if (keywords.length === 0) {
+                chipsHtml = '<span class="chip" style="background:#e9f2f9; color:#346a9e;"><i class="fas fa-check"></i> No strong risky keywords</span>';
+            } else {
+                keywords.forEach(kw => {
+                    chipsHtml += `<span class="chip"><i class="fas fa-bolt"></i> ${kw}</span>`;
+                });
+            }
+            keywordChips.innerHTML = chipsHtml;
+
+            let explanation = '';
+            if (score <= 3.5) {
+                explanation = '<strong>Low risk:</strong> The advice seems balanced with cautionary terms. No extreme promises detected.';
+            } else if (score <= 6.5) {
+                explanation = '<strong>Suspicious pattern:</strong> Hints of urgency or unspecified “gem” claims. Lacks diversification warning.';
+            } else {
+                explanation = '<strong>⚠️ High risk of misleading hype:</strong> Unrealistic returns, pressure tactics (“FOMO”, “life savings”) — typical of pumps and dumps.';
+            }
+            
+            if (keywords.includes('100x') || keywords.includes('1000%') || keywords.includes('moonshot')) {
+                explanation = '<strong>High risk — explosive promises:</strong> Unrealistic multiples and urgency suggest potential scam rhetoric.';
+            }
+            warningText.innerHTML = explanation;
+            
+            // Update the chart
+            updateChart(score, keywords);
+        }
+
+        analyzeBtn.addEventListener('click', () => {
+            const text = inputField.value.trim();
+            if (text === '') {
+                alert('Paste some financial advice to analyze.');
+                return;
+            }
+            const { score, keywords } = analyzeRisk(text);
+            updateResults(score, keywords);
+        });
+
+        // Initial analysis
+        window.addEventListener('load', () => {
+            const defaultText = inputField.value;
+            const { score, keywords } = analyzeRisk(defaultText);
+            updateResults(score, keywords);
+        });
+    })();
+</script>
+</body>
+</html>
