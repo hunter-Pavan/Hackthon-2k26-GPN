@@ -1644,66 +1644,33 @@
     const keywordBadge = document.getElementById('keywordBadge');
 
     // ----- Updated risk keywords with weights -----
-const RISK_KEYWORDS = [
-  { word: "guaranteed", weight: 20 },
-  { word: "5x", weight: 25 },
-  { word: "double money", weight: 20 },
-  { word: "100% return", weight: 30 },
-  { word: "no risk", weight: 25 },
-  { word: "sure profit", weight: 25 },
-  { word: "fixed income", weight: 10 },
-  { word: "instant profit", weight: 20 },
-  { word: "pump", weight: 15 },
-  { word: "dump", weight: 15 }
-];
+    const RISK_KEYWORDS = [
+      "guaranteed",
+      "5x",
+      "double money",
+      "100% return",
+      "no risk",
+      "sure profit",
+      "fixed income",
+      "instant profit"
+    ];
 
-// ----- Targeted asset mentions to bump risk -----
-const TARGETED_ASSETS = [
-  "bitcoin",
-  "crypto",
-  "nifty",
-  "banknifty",
-  "forex",
-  "options",
-  "futures",
-  "penny stock",
-  "altcoin",
-  "ethereum"
-];
+    function computeRiskScore({ videoUrl, advice }) {
+      let score = 0; // base score
+      let matchedKeywords = [];
+      const text = `${videoUrl || ""} ${advice || ""}`.toLowerCase();
 
-function computeRiskScore({ videoUrl, advice }) {
-  let score = 0;
-  let matchedKeywords = [];
+      RISK_KEYWORDS.forEach(keyword => {
+        if (text.includes(keyword.toLowerCase())) {
+          score += 15;
+          matchedKeywords.push(keyword);
+        }
+      });
 
-  // combine strings
-  const text = `${videoUrl || ""} ${advice || ""}`.toLowerCase();
-
-  // scan risk keywords
-  RISK_KEYWORDS.forEach(item => {
-    if (text.includes(item.word.toLowerCase())) {
-      score += item.weight;
-      matchedKeywords.push(item.word);
+      // Clamp between 0 and 100
+      score = Math.max(0, Math.min(100, score));
+      return { score, matchedKeywords };
     }
-  });
-
-  // check for targeted assets
-  TARGETED_ASSETS.forEach(asset => {
-    if (text.includes(asset.toLowerCase())) {
-      score += 10;
-      matchedKeywords.push(asset);
-    }
-  });
-
-  // bonus if many risks
-  if (matchedKeywords.length >= 3) {
-    score += 10;
-  }
-
-  // clamp so score stays between 0–100
-  score = Math.max(0, Math.min(100, score));
-
-  return { score, matchedKeywords };
-}
 
     function mapScoreToLevel(score) {
       if (score > 60) {
