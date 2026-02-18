@@ -1,1 +1,9 @@
+fastapi
+uvicorn
+youtube-transcript-api
+textblob
+matplotlib
+python-multipart
+transformers
+torch
 
