@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinGuard AI - Financial Influencer Risk Checker</title>
+  <meta name="description"
+    content="FinGuard AI is an AI-powered Financial Influencer Risk Checker that analyzes videos and advice text for potential risk before you invest." />
+
+  <style>
+    /* ==========
+       Base Styles
+       ========== */
+    :root {
+      --bg-main: radial-gradient(circle at top left, #1f3b73 0%, #020817 40%, #020617 100%);
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.2);
+      --accent-strong: #0ea5e9;
+      --accent-secondary: #14f4c4;
+      --text-main: #e5f2ff;
+      --text-muted: #9ca3af;
+      --card-bg: rgba(15, 23, 42, 0.7);
+      --border-subtle: rgba(148, 163, 184, 0.35);
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.7);
+      --radius-lg: 22px;
+      --radius-full: 999px;
+      --transition-fast: 180ms ease-out;
+      --transition-med: 260ms ease-out;
+      --risk-safe: #22c55e;
+      --risk-medium: #f97316;
+      --risk-high: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+      color: var(--text-main);
+      background: var(--bg-main);
+      background-attachment: fixed;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    /* ==========
+       Layout Helpers
+       ========== */
+    .container {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    section {
+      padding: 6rem 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+      section {
+        padding: 4rem 0;
+      }
+    }
+
+    .section-heading {
+      max-width: 640px;
+      margin: 0 auto 3rem;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.85rem;
+      border-radius: var(--radius-full);
+      background: linear-gradient(90deg,
+          rgba(56, 189, 248, 0.12),
+          rgba(45, 212, 191, 0.08));
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(1.9rem, 2.2vw + 1.4rem, 2.5rem);
+      margin-bottom: 0.9rem;
+      letter-spacing: -0.04em;
+    }
+
+    .section-heading p {
+      color: var(--text-muted);
+      max-width: 36rem;
+      margin: 0.25rem auto 0;
+    }
+
+    /* ==========
+       Navbar
+       ========== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(to bottom,
+          rgba(15, 23, 42, 0.94),
+          rgba(15, 23, 42, 0.7),
+          transparent);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1.5rem;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      font-size: 1.05rem;
+    }
+
+    .logo-mark {
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 0.85rem;
+      background: radial-gradient(circle at 20% 0%, #22c55e 0, #16a34a 12%, transparent 60%),
+        radial-gradient(circle at 80% 100%, #38bdf8 0, #0ea5e9 16%, transparent 65%),
+        rgba(15, 23, 42, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.85);
+      font-size: 1.2rem;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.3rem;
+      font-size: 0.95rem;
+    }
+
+    .nav-links a {
+      position: relative;
+      color: var(--text-muted);
+      padding: 0.3rem 0;
+      transition: color var(--transition-fast);
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+      transition: width var(--transition-fast);
+    }
+
+    .nav-links a:hover {
+      color: var(--text-main);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .nav-cta {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.3), transparent 55%),
+        rgba(15, 23, 42, 0.96);
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.3), 0 16px 30px rgba(15, 23, 42, 0.85);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .nav-cta span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-secondary);
+      box-shadow: 0 0 0 6px rgba(45, 212, 191, 0.16);
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 22px 40px rgba(15, 23, 42, 0.95);
+      border-color: rgba(56, 189, 248, 0.75);
+    }
+
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .nav-inner {
+        padding-inline: 1.1rem;
+      }
+
+      .nav-links {
+        position: absolute;
+        inset-inline: 1.1rem;
+        top: 3.4rem;
+        padding: 0.7rem 0.9rem;
+        border-radius: 18px;
+        background: rgba(15, 23, 42, 0.97);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        flex-direction: column;
+        align-items: flex-start;
+        transform-origin: top;
+        transform: scaleY(0.9);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--transition-med), transform var(--transition-med);
+      }
+
+      .nav-links.open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: scaleY(1);
+      }
+
+      .nav-cta {
+        width: 100%;
+        justify-content: center;
+        margin-top: 0.2rem;
+      }
+
+      .nav-toggle {
+        display: block;
+      }
+    }
+
+    /* ==========
+       Hero
+       ========== */
+    .hero {
+      padding-top: 4.5rem;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 1.2fr);
+      gap: 3.5rem;
+      align-items: center;
+    }
+
+    @media (max-width: 960px) {
+      .hero-inner {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2.75rem;
+      }
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.85rem;
+      border-radius: var(--radius-full);
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1.1rem;
+    }
+
+    .hero-kicker span.pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.8), rgba(45, 212, 191, 0.4));
+      color: #0b1120;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 3.7vw + 1.7rem, 3.7rem);
+      line-height: 1.07;
+      letter-spacing: -0.055em;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 span.highlight {
+      background: linear-gradient(120deg, #38bdf8, #22c55e, #14b8a6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      max-width: 34rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .hero-badge {
+      padding: 0.28rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 1.4rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .hero-stats strong {
+      display: block;
+      font-size: 1.1rem;
+      color: var(--text-main);
+    }
+
+    .hero-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.9rem 1.4rem;
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform var(--transition-med), box-shadow var(--transition-med), border-color var(--transition-med), background var(--transition-med), color var(--transition-med);
+      outline: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      color: #020617;
+      font-weight: 600;
+      box-shadow: 0 16px 35px rgba(8, 47, 73, 0.9);
+    }
+
+    .btn-primary::after {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      border: 1px solid rgba(226, 232, 240, 0.24);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1.5px) scale(1.01);
+      box-shadow: 0 22px 45px rgba(8, 47, 73, 1);
+    }
+
+    .btn-primary:hover::after {
+      opacity: 1;
+    }
+
+    .btn-ghost {
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-muted);
+      border-color: rgba(148, 163, 184, 0.5);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(15, 23, 42, 0.99);
+      border-color: rgba(148, 163, 184, 0.9);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--accent);
+      font-size: 1rem;
+    }
+
+    .hero-right {
+      position: relative;
+    }
+
+    .hero-card {
+      position: relative;
+      border-radius: 28px;
+      padding: 1.6rem 1.5rem;
+      background: radial-gradient(circle at 10% 0%, rgba(56, 189, 248, 0.26), transparent 52%),
+        radial-gradient(circle at 90% 100%, rgba(34, 197, 94, 0.24), transparent 55%),
+        rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+
+    .hero-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .hero-tag {
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .hero-chip {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-scan-card {
+      border-radius: 20px;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 0.9rem;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+    }
+
+    .hero-scan-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.7rem;
+    }
+
+    .hero-scan-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .hero-scan-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.16);
+      color: #bbf7d0;
+      font-size: 0.75rem;
+    }
+
+    .hero-meter {
+      position: relative;
+      height: 0.6rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      overflow: hidden;
+      margin-bottom: 0.55rem;
+    }
+
+    .hero-meter-fill {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+      transform-origin: left;
+      transform: scaleX(0.1);
+      animation: heroMeterPulse 2.6s ease-in-out infinite alternate;
+    }
+
+    @keyframes heroMeterPulse {
+      from {
+        transform: scaleX(0.35);
+      }
+
+      to {
+        transform: scaleX(0.75);
+      }
+    }
+
+    .hero-scan-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .hero-scan-footer strong {
+      color: var(--text-main);
+      font-size: 1.1rem;
+    }
+
+    .hero-floating {
+      position: absolute;
+      inset: auto;
+      bottom: -0.9rem;
+      right: -0.4rem;
+      width: 9.4rem;
+      border-radius: 22px;
+      padding: 0.7rem 0.75rem;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      box-shadow: 0 18px 32px rgba(15, 23, 42, 1);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .hero-floating strong {
+      display: block;
+      color: var(--accent-secondary);
+      margin-bottom: 0.2rem;
+    }
+
+    @media (max-width: 960px) {
+      .hero {
+        padding-top: 3.2rem;
+      }
+
+      .hero-right {
+        order: -1;
+      }
+
+      .hero-card {
+        max-width: 24rem;
+        margin-inline: auto;
+      }
+    }
+
+    /* ==========
+       Feature Section
+       ========== */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.8rem;
+    }
+
+    @media (max-width: 960px) {
+      .feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .feature-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .feature-card {
+      position: relative;
+      border-radius: var(--radius-lg);
+      padding: 1.4rem 1.3rem;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.82));
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      isolation: isolate;
+      transition: transform var(--transition-med), box-shadow var(--transition-med), border-color var(--transition-med), background var(--transition-med);
+    }
+
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(45, 212, 191, 0.18), transparent 60%);
+      opacity: 0;
+      transition: opacity var(--transition-med);
+      z-index: -1;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(56, 189, 248, 0.9);
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.95);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.8), rgba(15, 23, 42, 1));
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 1);
+      font-size: 1.2rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.9rem;
+    }
+
+    .feature-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .feature-tag {
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    /* ==========
+       How It Works
+       ========== */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.6rem;
+    }
+
+    @media (max-width: 960px) {
+      .steps-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .steps-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .step-card {
+      position: relative;
+      border-radius: var(--radius-lg);
+      padding: 1.2rem 1.1rem 1.1rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      box-shadow: var(--shadow-soft);
+      transition: border-color var(--transition-med), transform var(--transition-med), box-shadow var(--transition-med), background var(--transition-med);
+      overflow: hidden;
+    }
+
+    .step-card::before {
+      content: "";
+      position: absolute;
+      inset: -35%;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 60%);
+      opacity: 0;
+      transition: opacity var(--transition-med);
+      z-index: -1;
+    }
+
+    .step-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(56, 189, 248, 0.75);
+      box-shadow: 0 20px 30px rgba(15, 23, 42, 0.95);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .step-card:hover::before {
+      opacity: 1;
+    }
+
+    .step-number {
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: 0.75rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.9rem;
+    }
+
+    .step-card h3 {
+      font-size: 1.02rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .step-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========
+       Analyzer
+       ========== */
+    .analyzer-wrapper {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.3fr);
+      gap: 2rem;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 960px) {
+      .analyzer-wrapper {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .analyzer-card,
+    .result-card {
+      border-radius: 26px;
+      padding: 1.4rem 1.3rem;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(16px);
+    }
+
+    .analyzer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .analyzer-header h3 {
+      font-size: 1.1rem;
+    }
+
+    .input-chip-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    .input-chip-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0, #38bdf8, #22c55e);
+      box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.18);
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    .input-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.35rem;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    .input-label span.main {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .input-label span.hint {
+      font-size: 0.8rem;
+    }
+
+    .text-input,
+    .textarea-input {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      padding: 0.65rem 0.85rem;
+      outline: none;
+      resize: vertical;
+      min-height: 2.5rem;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .textarea-input {
+      min-height: 6rem;
+      line-height: 1.5;
+    }
+
+    .text-input::placeholder,
+    .textarea-input::placeholder {
+      color: rgba(148, 163, 184, 0.7);
+    }
+
+    .text-input:focus,
+    .textarea-input:focus {
+      border-color: rgba(56, 189, 248, 0.9);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.7);
+      background: rgba(15, 23, 42, 0.99);
+      transform: translateY(-0.5px);
+    }
+
+    .analyzer-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.9rem;
+      margin-top: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .analyzer-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      max-width: 17rem;
+    }
+
+    .analyzer-note strong {
+      color: var(--accent-secondary);
+    }
+
+    .btn-analyze {
+      min-width: 10.5rem;
+    }
+
+    .btn-analyze[disabled] {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 10px 20px rgba(8, 47, 73, 0.7);
+    }
+
+    /* Result Card */
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.9rem;
+      gap: 0.6rem;
+    }
+
+    .result-level-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    .result-level-dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: var(--risk-safe);
+      box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.22);
+    }
+
+    .result-score {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .result-score strong {
+      font-size: 1.1rem;
+      color: var(--text-main);
+    }
+
+    .result-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .result-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: rgba(15, 23, 42, 0.96);
+      color: var(--text-muted);
+    }
+
+    .result-body {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .result-body strong {
+      color: var(--text-main);
+    }
+
+    .result-warning {
+      margin-top: 0.9rem;
+      padding: 0.65rem 0.7rem;
+      border-radius: 16px;
+      border: 1px solid rgba(248, 250, 252, 0.1);
+      background: rgba(15, 23, 42, 0.98);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 0.55rem;
+      align-items: flex-start;
+    }
+
+    .result-warning span {
+      font-size: 1rem;
+    }
+
+    .result-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      opacity: 0;
+      transition: opacity var(--transition-med);
+      z-index: -1;
+    }
+
+    .result-card.safe::before {
+      background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.3), transparent 55%);
+      opacity: 1;
+    }
+
+    .result-card.medium::before {
+      background: radial-gradient(circle at top left, rgba(234, 179, 8, 0.32), transparent 55%);
+      opacity: 1;
+    }
+
+    .result-card.high::before {
+      background: radial-gradient(circle at top left, rgba(239, 68, 68, 0.35), transparent 55%);
+      opacity: 1;
+    }
+
+    /* Loading State */
+    .loading-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.7rem;
+    }
+
+    .spinner {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 999px;
+      border: 2px solid rgba(148, 163, 184, 0.6);
+      border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ==========
+       About
+       ========== */
+    .about-card {
+      max-width: 720px;
+      margin: 0 auto;
+      border-radius: 26px;
+      padding: 1.6rem 1.5rem;
+      background: linear-gradient(125deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      box-shadow: var(--shadow-soft);
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    .about-card strong {
+      color: var(--text-main);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr);
+      gap: 2rem;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .about-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .about-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.9rem;
+    }
+
+    .about-pill {
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========
+       Footer
+       ========== */
+    footer {
+      border-top: 1px solid rgba(148, 163, 184, 0.3);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98));
+      padding: 1.6rem 0 2.2rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.9rem;
+    }
+
+    .footer-disclaimer {
+      max-width: 32rem;
+    }
+
+    .footer-meta {
+      display: flex;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-pill {
+      padding: 0.18rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    /* ==========
+       Scroll Fade-in Animations
+       ========== */
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 500ms ease-out, transform 500ms ease-out;
+    }
+
+    .fade-in-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-delay-1 {
+      transition-delay: 60ms;
+    }
+
+    .fade-delay-2 {
+      transition-delay: 120ms;
+    }
+
+    .fade-delay-3 {
+      transition-delay: 180ms;
+    }
+
+    .fade-delay-4 {
+      transition-delay: 240ms;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ==========
+       Navigation
+       ========== -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="#home" class="logo">
+        <span class="logo-mark">💰</span>
+        <span>FinGuard AI</span>
+      </a>
+
+      <button class="nav-toggle" aria-label="Toggle navigation" id="navToggle">
+        ☰
+      </button>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#home">Home</a>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#analyzer">Analyzer</a>
+        <a href="#about">About</a>
+        <button class="nav-cta" onclick="document.getElementById('analyzer').scrollIntoView({behavior:'smooth'})">
+          <span class="dot"></span>
+          Run a quick safety check
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==========
+       Hero
+       ========== -->
+  <main id="home" class="hero">
+    <div class="container">
+      <div class="hero-inner fade-in-up visible">
+        <div class="hero-left">
+          <div class="hero-kicker">
+            <span class="pill">New</span>
+            AI guardrails for financial influencers
+          </div>
+
+          <h1>
+            Verify Before You <span class="highlight">Invest</span>
+          </h1>
+          <p>
+            FinGuard AI scans financial influencer videos and scripts for risky
+            promises, hype, and red flags — giving you a clear, explainable risk
+            score <em>before</em> you put any money at stake.
+          </p>
+
+          <div class="hero-cta-row" style="margin-bottom: 1.1rem;">
+            <button class="btn btn-primary btn-analyze" onclick="document.getElementById('analyzer').scrollIntoView({behavior:'smooth'})">
+              Start free risk check
+              <span class="btn-icon">➜</span>
+            </button>
+            <button class="btn btn-ghost" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
+              See how it works
+            </button>
+          </div>
+
+          <div class="hero-meta">
+            <div class="hero-badges">
+              <span class="hero-badge">Detect hype-y guarantees</span>
+              <span class="hero-badge">Score influencer recommendations</span>
+              <span class="hero-badge">Built for retail investors</span>
+            </div>
+            <div class="hero-stats">
+              <div>
+                <strong>60s</strong>
+                average check time
+              </div>
+              <div>
+                <strong>8+</strong>
+                common scam phrases tracked
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-right fade-in-up fade-delay-2">
+          <div class="hero-card">
+            <div class="hero-card-header">
+              <span class="hero-tag">Live demo • Risk analyzer</span>
+              <span>FinGuard AI Preview</span>
+            </div>
+
+            <div class="hero-chip-row">
+              <span class="hero-chip">YouTube / TikTok link</span>
+              <span class="hero-chip">Script scan</span>
+              <span class="hero-chip">Risk score (0–100)</span>
+              <span class="hero-chip">Beginner warning mode</span>
+            </div>
+
+            <div class="hero-scan-card">
+              <div class="hero-scan-top">
+                <div>
+                  <div class="hero-scan-label">Sample influencer script</div>
+                  <div style="font-size: 0.8rem; color: var(--text-main);">
+                    “This coin is <strong>guaranteed</strong> to <strong>5x</strong> in 30 days…”
+                  </div>
+                </div>
+                <div class="hero-scan-pill">
+                  <span style="width: 0.55rem; height: 0.55rem; border-radius: 999px; background: var(--risk-high); box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.35);"></span>
+                  Auto-flagged
+                </div>
+              </div>
+
+              <div class="hero-meter">
+                <div class="hero-meter-fill"></div>
+              </div>
+
+              <div class="hero-scan-footer">
+                <div>
+                  Risk level
+                  <strong>High</strong>
+                </div>
+                <div>
+                  Risk score
+                  <strong>82 / 100</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-floating">
+              <strong>Beginner safeguard</strong>
+              Rewrites complex calls-to-action into a plain-English warning that even a first-time investor can act on.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==========
+       Features
+       ========== -->
+  <section id="features">
+    <div class="container fade-in-up">
+      <div class="section-heading">
+        <div class="eyebrow">
+          <span>Why FinGuard AI</span>
+        </div>
+        <h2>AI guardrails for financial hype</h2>
+        <p>
+          FinGuard AI turns influencer promises into structured risk signals, so
+          you can separate education from entertainment and avoid emotionally
+          charged decisions.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card fade-in-up fade-delay-1">
+          <div class="feature-icon">🧠</div>
+          <h3>Risk Detection</h3>
+          <p>
+            Surfaces dangerous phrases like “no risk”, “sure profit”, or
+            “guaranteed 5x” that often signal unrealistic promises and scams.
+          </p>
+          <div class="feature-meta">
+            <span class="feature-tag">Language model ready</span>
+            <span>Text &amp; video script support</span>
+          </div>
+        </article>
+
+        <article class="feature-card fade-in-up fade-delay-2">
+          <div class="feature-icon">📊</div>
+          <h3>Risk Score System</h3>
+          <p>
+            Converts influencer claims into a transparent 0–100 risk score with
+            Safe / Medium Risk / High Risk categories for quick decision-making.
+          </p>
+          <div class="feature-meta">
+            <span class="feature-tag">Explainable scoring</span>
+            <span>Beginner-friendly labels</span>
+          </div>
+        </article>
+
+        <article class="feature-card fade-in-up fade-delay-3">
+          <div class="feature-icon">🚨</div>
+          <h3>Scam Keyword Alerts</h3>
+          <p>
+            Flags combinations of hype keywords and unrealistic return promises
+            that commonly appear in pump-and-dump or get-rich-quick schemes.
+          </p>
+          <div class="feature-meta">
+            <span class="feature-tag">Customizable rules</span>
+            <span>Python-ready rule engine</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========
+       How It Works
+       ========== -->
+  <section id="how-it-works">
+    <div class="container fade-in-up">
+      <div class="section-heading">
+        <div class="eyebrow">
+          <span>How It Works</span>
+        </div>
+        <h2>From influencer clip to risk score in four steps</h2>
+        <p>
+          Paste the link, drop the script, and let FinGuard AI translate hyperbole
+          into a risk signal you can actually act on.
+        </p>
+      </div>
+
+      <div class="steps-grid">
+        <article class="step-card fade-in-up fade-delay-1">
+          <div class="step-number">1</div>
+          <h3>Paste the video link</h3>
+          <p>
+            Drop a YouTube, TikTok, or other public link to the financial
+            influencer content you want to sanity-check.
+          </p>
+        </article>
+
+        <article class="step-card fade-in-up fade-delay-2">
+          <div class="step-number">2</div>
+          <h3>Add the key advice text</h3>
+          <p>
+            Paste the main call-to-action, quote, or script you’re unsure about —
+            we focus on what actually moves money.
+          </p>
+        </article>
+
+        <article class="step-card fade-in-up fade-delay-3">
+          <div class="step-number">3</div>
+          <h3>Run an AI risk scan</h3>
+          <p>
+            Our engine (and your future Python backend) inspects for hype,
+            guaranteed returns, and classic scam patterns.
+          </p>
+        </article>
+
+        <article class="step-card fade-in-up fade-delay-4">
+          <div class="step-number">4</div>
+          <h3>Review the risk score</h3>
+          <p>
+            Get a color-coded risk level, numeric score, explanation, and a plain
+            English beginner warning before you decide what to do next.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========
+       Analyzer
+       ========== -->
+  <section id="analyzer">
+    <div class="container fade-in-up">
+      <div class="section-heading">
+        <div class="eyebrow">
+          <span>Live Analyzer</span>
+        </div>
+        <h2>Check a financial influencer in under a minute</h2>
+        <p>
+          This demo runs entirely in your browser with placeholder logic. Swap in
+          your Python / Flask / FastAPI backend when you are ready to plug in
+          real AI models.
+        </p>
+      </div>
+
+      <div class="analyzer-wrapper">
+        <!-- Input Card -->
+        <div class="analyzer-card">
+          <div class="analyzer-header">
+            <h3>AI-Powered Risk Check</h3>
+            <div class="input-chip-row">
+              <span class="input-chip-dot"></span>
+              Client-side demo • Backend ready
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="input-label">
+              <span class="main">Video link</span>
+              <span class="hint">YouTube / TikTok / Reels (optional)</span>
+            </div>
+            <input id="videoUrl" class="text-input" type="url" placeholder="https://www.youtube.com/watch?v=..." />
+          </div>
+
+          <div class="input-group">
+            <div class="input-label">
+              <span class="main">Financial advice text</span>
+              <span class="hint">Paste the main claim or script</span>
+            </div>
+            <textarea id="adviceText" class="textarea-input" placeholder="Example: This coin is guaranteed to 5x your money in 30 days with no risk..."></textarea>
+          </div>
+
+          <div class="analyzer-footer">
+            <div>
+              <button id="analyzeBtn" class="btn btn-primary btn-analyze">
+                Analyze risk now
+              </button>
+              <div id="loadingRow" class="loading-row" style="display: none;">
+                <div class="spinner"></div>
+                <span>Running local demo scan…</span>
+              </div>
+            </div>
+            <p class="analyzer-note">
+              <strong>Hackathon-ready:</strong> swap this demo logic with an API
+              call to your Python backend. No UI changes required.
+            </p>
+          </div>
+        </div>
+
+        <!-- Result Card -->
+        <aside id="resultCard" class="result-card" style="display: none;">
+          <div class="result-header">
+            <div>
+              <div class="result-level-pill" id="resultLevelPill">
+                <span class="result-level-dot" id="resultDot"></span>
+                <span id="resultLevelLabel">Risk Level: —</span>
+              </div>
+            </div>
+            <div class="result-score">
+              Risk score
+              <strong id="resultScore">0 / 100</strong>
+            </div>
+          </div>
+
+          <div class="result-badges">
+            <span class="result-badge" id="keywordBadge">Keywords flagged: 0</span>
+            <span class="result-badge">Demo rule engine active</span>
+            <span class="result-badge">Educational use only</span>
+          </div>
+
+          <div class="result-body">
+            <p id="resultExplanation">
+              Paste a financial claim and run the analyzer to see a breakdown of
+              potential risks based on placeholder keyword rules.
+            </p>
+            <p id="resultBeginner">
+              When enabled with a real AI backend, this section can rewrite
+              complex advice into a beginner-friendly warning tailored to your
+              experience level.
+            </p>
+          </div>
+
+          <div class="result-warning" id="resultWarningBox">
+            <span>⚠️</span>
+            <div>
+              <strong>Educational only:</strong> FinGuard AI does not provide
+              personalized financial advice. Always do your own research and
+              consult a licensed professional before making investment decisions.
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========
+       About
+       ========== -->
+  <section id="about">
+    <div class="container fade-in-up">
+      <div class="section-heading">
+        <div class="eyebrow">
+          <span>Our Mission</span>
+        </div>
+        <h2>Preventing financial misinformation at the source</h2>
+        <p>
+          Retail investors deserve tools that translate hype into risk — especially
+          when their first exposure to markets is through short-form content.
+        </p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <p>
+            <strong>FinGuard AI</strong> is built for the next generation of
+            investors who learn from creators before they ever open a brokerage
+            account. Our goal is simple: make it effortless to sanity-check
+            financial claims before emotions, FOMO, or social pressure take over.
+          </p>
+          <p style="margin-top: 0.7rem;">
+            By combining transparent rule-based checks with pluggable AI models,
+            FinGuard AI helps platforms, creators, and viewers spot dangerous
+            narratives early — without slowing down the pace of modern social
+            feeds.
+          </p>
+        </div>
+
+        <div>
+          <div class="about-pill-row">
+            <span class="about-pill">AI safety for finance content</span>
+            <span class="about-pill">Explainable, color-coded scoring</span>
+            <span class="about-pill">Backend-agnostic architecture</span>
+            <span class="about-pill">Built for hackathons &amp; pilots</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========
+       Footer
+       ========== -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-disclaimer">
+          <strong>Disclaimer:</strong> FinGuard AI is provided strictly for
+          educational and research purposes. It does not provide investment,
+          legal, or tax advice, and should not be relied upon as a sole basis
+          for financial decisions.
+        </div>
+        <div class="footer-meta">
+          <span class="footer-pill">Demo build • FinGuard AI</span>
+          <span class="footer-pill">AI-ready frontend • Python backend hook</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ==============================
+    // Navigation toggle (mobile)
+    // ==============================
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+    });
+
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (navLinks.classList.contains('open')) {
+          navLinks.classList.remove('open');
+        }
+      });
+    });
+
+    // ==============================
+    // Scroll-based fade-in animation
+    // ==============================
+    const fadeEls = document.querySelectorAll('.fade-in-up');
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      {
+        threshold: 0.18
+      }
+    );
+
+    fadeEls.forEach(el => observer.observe(el));
+
+    // ==============================
+    // Risk Analyzer Demo Logic
+    // ==============================
+
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const loadingRow = document.getElementById('loadingRow');
+    const resultCard = document.getElementById('resultCard');
+    const resultScoreEl = document.getElementById('resultScore');
+    const resultLevelLabel = document.getElementById('resultLevelLabel');
+    const resultDot = document.getElementById('resultDot');
+    const resultExplanation = document.getElementById('resultExplanation');
+    const resultBeginner = document.getElementById('resultBeginner');
+    const keywordBadge = document.getElementById('keywordBadge');
+
+    const RISK_KEYWORDS = [
+      "guaranteed",
+      "5x",
+      "double money",
+      "100% return",
+      "no risk",
+      "sure profit",
+      "fixed income",
+      "instant profit"
+    ];
+
+    function computeRiskScore({ videoUrl, advice }) {
+      let score = 20; // base score
+      let matchedKeywords = [];
+      const text = `${videoUrl || ""} ${advice || ""}`.toLowerCase();
+
+      RISK_KEYWORDS.forEach(keyword => {
+        if (text.includes(keyword.toLowerCase())) {
+          score += 15;
+          matchedKeywords.push(keyword);
+        }
+      });
+
+      // Clamp between 0 and 100
+      score = Math.max(0, Math.min(100, score));
+      return { score, matchedKeywords };
+    }
+
+    function mapScoreToLevel(score) {
+      if (score > 60) {
+        return {
+          label: "HIGH RISK",
+          className: "high",
+          color: getComputedStyle(document.documentElement).getPropertyValue('--risk-high').trim(),
+          explanation: "This content contains multiple high-risk claims such as guaranteed returns, extreme upside, or promises that ignore downside and volatility.",
+          beginner: "If you are new to investing, treat this as a strong warning sign. Do not invest money you can’t afford to lose, and seek independent, regulated advice."
+        };
+      }
+
+      if (score >= 35) {
+        return {
+          label: "MEDIUM RISK",
+          className: "medium",
+          color: getComputedStyle(document.documentElement).getPropertyValue('--risk-medium').trim(),
+          explanation: "This content mixes education with marketing-style language. Some claims may be realistic, but there are still signs of hype or incomplete risk disclosure.",
+          beginner: "If you’re a beginner, slow down and verify the facts from multiple trusted sources. Avoid acting on a single influencer’s content."
+        };
+      }
+
+      return {
+        label: "SAFE",
+        className: "safe",
+        color: getComputedStyle(document.documentElement).getPropertyValue('--risk-safe').trim(),
+        explanation: "The text does not contain obvious hype or scam-like phrases from the demo keyword list. It may still carry risk, but not from the patterns we scan here.",
+        beginner: "Even apparently safe content can be incomplete. Make sure you understand fees, liquidity, and downside risk before following any suggestion."
+      };
+    }
+
+    function updateResultUI({ score, matchedKeywords }) {
+      const levelInfo = mapScoreToLevel(score);
+
+      resultCard.style.display = 'block';
+      resultCard.classList.remove('safe', 'medium', 'high');
+      resultCard.classList.add(levelInfo.className);
+
+      resultScoreEl.textContent = `${score} / 100`;
+      resultLevelLabel.textContent = `Risk Level: ${levelInfo.label}`;
+
+      resultDot.style.backgroundColor = levelInfo.color;
+      resultDot.style.boxShadow = `0 0 0 5px ${levelInfo.color}33`;
+
+      if (matchedKeywords.length > 0) {
+        keywordBadge.textContent = `Keywords flagged: ${matchedKeywords.length} (${matchedKeywords.join(", ")})`;
+      } else {
+        keywordBadge.textContent = "Keywords flagged: 0 (no demo keywords detected)";
+      }
+
+      resultExplanation.textContent = levelInfo.explanation;
+      resultBeginner.textContent = levelInfo.beginner;
+    }
+
+    analyzeBtn.addEventListener('click', () => {
+      const videoUrl = document.getElementById('videoUrl').value.trim();
+      const adviceText = document.getElementById('adviceText').value.trim();
+
+      if (!videoUrl && !adviceText) {
+        alert("Please paste at least a video link or some financial advice text to analyze.");
+        return;
+      }
+
+      analyzeBtn.disabled = true;
+      loadingRow.style.display = 'flex';
+
+      // ==========================================
+      // Placeholder: Simulated AI backend call
+      // ==========================================
+      //
+      // In production, replace the setTimeout with a real
+      // call to your Python/Flask/FastAPI backend, e.g.:
+      //
+      //   fetch("https://your-backend.com/api/analyze", {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({ video_url: videoUrl, advice_text: adviceText })
+      //   })
+      //   .then(res => res.json())
+      //   .then(data => {
+      //     // Expected response shape (example):
+      //     // { score: number, level: "SAFE"|"MEDIUM RISK"|"HIGH RISK", explanation: string, beginner_warning: string, matched_keywords: string[] }
+      //     updateResultUI({
+      //       score: data.score,
+      //       matchedKeywords: data.matched_keywords || []
+      //     });
+      //   })
+      //   .catch(err => {
+      //     console.error("AI backend error", err);
+      //     // Optionally surface a user-friendly message
+      //   })
+      //   .finally(() => {
+      //     analyzeBtn.disabled = false;
+      //     loadingRow.style.display = 'none';
+      //   });
+      //
+      // For this hackathon-ready demo, we keep everything
+      // client-side and mimic latency with a timeout.
+
+      setTimeout(() => {
+        const result = computeRiskScore({ videoUrl, advice: adviceText });
+        updateResultUI(result);
+
+        analyzeBtn.disabled = false;
+        loadingRow.style.display = 'none';
+      }, 1000);
+    });
+  </script>
+</body>
+
+</html>
+
