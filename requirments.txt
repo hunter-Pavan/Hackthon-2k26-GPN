@@ -1,9 +1,111 @@
-fastapi
-uvicorn
+1️⃣ Project Folder Structure
+
+ai-finfluencer/
+│
+├── app.py
+├── analyzer.py
+├── url_fetcher.py
+├── requirements.txt
+└── samples.txt
+🧠 2️⃣ analyzer.py — Risk Detection Engine
+
+RISK_KEYWORDS = {
+    "guaranteed profit": 3,
+    "double your money": 4,
+    "secret tip": 2,
+    "no risk": 3,
+    "insider stock": 4
+}
+
+def analyze_text(text):
+    text = text.lower()
+    score = 0
+    found = []
+
+    for word, value in RISK_KEYWORDS.items():
+        if word in text:
+            score += value
+            found.append(word)
+
+    if score <= 3:
+        level = "LOW RISK"
+    elif score <= 6:
+        level = "SUSPICIOUS"
+    else:
+        level = "HIGH RISK"
+
+    return score, level, found
+🌐 3️⃣ url_fetcher.py — URL → Text Extractor
+👉 YouTube + webpage support (hackathon friendly).
+Python
+
+import requests
+from bs4 import BeautifulSoup
+from youtube_transcript_api import YouTubeTranscriptApi
+
+def fetch_web_text(url):
+    page = requests.get(url)
+    soup = BeautifulSoup(page.text, "html.parser")
+    return soup.get_text()
+
+def fetch_youtube_text(video_id):
+    transcript = YouTubeTranscriptApi.get_transcript(video_id)
+    return " ".join([t["text"] for t in transcript])
+🎨 4️⃣ app.py — Streamlit UI
+
+Python
+import streamlit as st
+from analyzer import analyze_text
+from url_fetcher import fetch_web_text
+
+st.title("💰 AI Finfluencer Risk Detector")
+
+option = st.radio("Choose Input Type:", ["Text", "URL"])
+
+text_data = ""
+
+if option == "Text":
+    text_data = st.text_area("Paste financial advice:")
+
+if option == "URL":
+    url = st.text_input("Paste URL:")
+    if st.button("Fetch Content"):
+        text_data = fetch_web_text(url)
+        st.success("Content fetched!")
+
+if st.button("Analyze"):
+    score, level, found = analyze_text(text_data)
+
+    st.subheader("📊 Risk Score:")
+    st.write(score)
+
+    st.subheader("⚠ Risk Level:")
+    st.write(level)
+
+    st.subheader("🔍 Flagged Words:")
+    st.write(found)
+🧪 5️⃣ samples.txt — Demo Data
+
+
+Guaranteed profit in 7 days!
+Double your money fast!
+This insider stock tip will explode!
+Demo ke time paste karna — instant risk detection milega.
+⚙ 6️⃣ requirements.txt
+
+
+streamlit
 youtube-transcript-api
-textblob
-matplotlib
-python-multipart
-transformers
-torch
+beautifulsoup4
+requests
+Install:
+Copy code
+
+pip install -r requirements.txt
+▶ 7️⃣ Run Project
+Terminal :
+
+
+streamlit run app.py
+Browser khul jayega → UI ready.
 
