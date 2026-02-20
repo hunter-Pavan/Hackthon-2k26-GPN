@@ -79,6 +79,7 @@ Examples of flagged phrases:
 👥 Team
 
 Hackathon project built for rapid prototyping and demonstration.
+
 By Team Alpha Squad 😎
 
 ---
